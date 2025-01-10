@@ -93,6 +93,19 @@ switch ($_POST["action"]) {
 
 
             break;
+        case 'update':
+
+            echo json_encode([
+                "status" => "Success",
+                "message" => "Succesfully updated the coffee machine",
+                "sugar" => $machine->getSugar(),
+                "coffee" => $machine->getCoffee(),
+                "isOn" => $machine->getEnFonction(),
+            ]);
+
+
+
+            break;
     
     default:
         echo json_encode([
