@@ -205,6 +205,11 @@ class MachineACafe
             return "T'essaye de m'arnaquer ? t'as même pas assez pour du café allez barre toi";
         }
 
+        // Regarde si la macihne est allumée
+        if (!$this->enFonction) {
+            return "Vous insérez {$argentDonne} € dans la machine a café. Vous attendez un moment, les minutes passent, et il n'y a toujours pas de café, peut-être est-ce du au fait que vous aviez éteint la machine juste avant de dépenser votre argent, personne ne le saura.";
+        }
+
 
         $texteRendu = $this->calculerDifferenceCafe($argentDonne, $this->finalPrice);
 
