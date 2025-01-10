@@ -1,8 +1,6 @@
 <?php
 include_once("../utils/autoloader.php");
 session_start();
-
-var_dump($_SESSION)
 ?>
 
 <!DOCTYPE html>
@@ -10,7 +8,7 @@ var_dump($_SESSION)
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Machine à Café</title>
 
     <style>
         .flex{
@@ -121,7 +119,7 @@ var_dump($_SESSION)
             box-shadow: inset 0 2px 5px rgba(255,255,255,0.2);
         }
         .switch-btn.on{
-            background:rgb(32, 252, 24);
+            background:rgb(177, 2, 2);
         }
 
         .button {
@@ -184,26 +182,14 @@ var_dump($_SESSION)
     </div>
 
     <div class="container">
-
-
-
-        <div class="text-container">
-
-        </div>
-
-
-        <div class="machine-container">
-            
-
-        </div>
-
-
+        <div class="text-container"></div>
+        <div class="machine-container"></div>
     </div>
 </body>
 
-
-
 <script>
+
+
     
     let $machineContainer = document.querySelector(".machine-container");
     let $textContainer = document.querySelector(".text-container");
@@ -249,6 +235,7 @@ var_dump($_SESSION)
     async function powerMachine(event) {
 
         event.preventDefault();
+
         console.log("On power la machine");
         
 
@@ -285,73 +272,170 @@ var_dump($_SESSION)
 
         $container.innerHTML += `
             <div class="coffee-machine" id="machine-${machineName}">
-                <div class="status">${machineName}</div>
-                <button class="switch-btn" id="power">Power On/Off</button>
+            <div class="status">${machineName}</div>
+            <button class="switch-btn" id="power">I/O</button>
+            <div class="flex flex-col">
                 <button class="button" id="sugar">Sugar: Off</button>
-                <button class="button" id="demanderCafe">Demander</button>
+                <p class="button" id="sugarCount">En stock :</p>
+                <button class="button" id="addSugar">Ajouter Sucre</button>
+                <p class="button" id="cafeCount">Dosettes En stock :</p>
+                <button class="button" id="addCoffee">Ajouter Café</button>
+            </div>
+            <button class="button" id="demanderCafe">Demander</button>
 
-                <form id="pay">
-                    <input type="number" step="0.01" placeholder="Insert Money €">
-                    <button type="submit" class="button">Pay</button>
-                </form>
+            <form id="pay">
+                <input type="number" step="0.01" placeholder="Insert Money €">
+                <button type="submit" class="button">Pay</button>
+            </form>
             </div>
         `
+        
 
         // Initialise la machine todo: mettre dans une nouvelle fonction
         document.querySelector("#power").addEventListener("click", powerMachine);
         document.querySelector("#sugar").addEventListener("click", toggleSugar);
         document.querySelector("#demanderCafe").addEventListener("click", demanderCafe);
         document.querySelector("#pay").addEventListener("submit", payerCafe);
+        document.querySelector("#addSugar").addEventListener("click", addSugar);
+        document.querySelector("#addCoffee").addEventListener("click", addCoffee);
 
     }
 
 
+    let hasAskedSugar = false;
 
     function toggleSugar(event){
         event.preventDefault();
         
-
+        hasAskedSugar = !hasAskedSugar;
+        document.querySelector("#sugar").innerHTML = hasAskedSugar ? "Sugar: On" : "Sugar: Off";
     }
+
 
     function demanderCafe(event){
         event.preventDefault();
+
+        return fetch('actions.php', {
+            method: 'POST',
+            body: new URLSearchParams({
+            "action": 'ask',
+            "avecSucre": hasAskedSugar
+            }),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            $textContainer.innerHTML += `<p> ${data.message} </p>`            
+        })
         
 
     }
+
+
+
+    function addCoffee(event){
+        event.preventDefault();
+
+        return fetch('actions.php', {
+            method: 'POST',
+            body: new URLSearchParams({
+            "action": 'addcoffee',
+            }),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            $textContainer.innerHTML += `<p> ${data.message} </p>`
+            document.querySelector("#cafeCount").innerHTML = "Dosettes en stock : "  + data.coffee
+        })
+        
+
+    }
+
+    function addSugar(event){
+        event.preventDefault();
+
+        return fetch('actions.php', {
+            method: 'POST',
+            body: new URLSearchParams({
+            "action": 'addsugar',
+            }),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            $textContainer.innerHTML += `<p> ${data.message} </p>`
+            document.querySelector("#sugarCount").innerHTML = "Sucre en stock : "  + data.sugar
+        })
+        
+
+    }
+
 
     function payerCafe(event){
         event.preventDefault();
+
+
+        event.preventDefault();
+        
+        let amountGiven = document.querySelector("#pay>input").value;
+
+        return fetch('actions.php', {
+            method: 'POST',
+            body: new URLSearchParams({
+            "action": 'pay',
+            "amountgiven": amountGiven
+            }),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // error_log(print_r(data))
+            $textContainer.innerHTML += `<p> ${data.message} </p>`
+            
+            document.querySelector("#pay>input").value = ""
+            document.querySelector("#cafeCount").innerHTML = "Dosettes en stock : "  + data.coffee
+            document.querySelector("#sugarCount").innerHTML = "Sucre en stock : "  + data.sugar
+
+
+
+        })
+
         
 
     }
 
-
-
-    // async function fetchData(bodyContent) {
-    //     return fetch('actions.php', {
-    //         method: 'POST',
-    //         body: new URLSearchParams(bodyContent),
-    //         headers: {
-    //             'Content-Type': 'application/json'
-    //         }
-    //     })
-    //     .then(response => {
-    //         if (!response.ok) {
-    //             throw new Error('Network response was not ok');
-    //         }
-    //         return response.json();
-    //     })
-    //     .then(data => {
-    //         // error_log(print_r(data))
-    //         return data;
-    //     })
-    //     .catch(error => {
-    //         console.error('Erreur ici :', error);
-    //         return { status: "Failed", message: error.message };
-    //     });
-    // }
-    
-    
+    <?php if (isset($_SESSION["machine"])){ ?>
+        drawMachine("<?php echo $_SESSION["machine"]->getMarque(); ?>");
+    <?php } ?>
     
 </script>
 

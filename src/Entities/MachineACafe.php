@@ -30,8 +30,25 @@ class MachineACafe
     }
 
 
+    public function getMarque():string {
+        return $this->marque;
+    }
+
     public function getEnFonction():bool {
         return $this->enFonction;
+    }
+
+    public function getSugar():int {
+        return $this->sugar;
+    }
+    public function getCoffee():int {
+        return $this->cafe;
+    }
+    public function getPrixCafe():float {
+        return $this->prixCafe;
+    }
+    public function getPrixSucre():float {
+        return $this->prixSucre;
     }
 
 
@@ -70,6 +87,7 @@ class MachineACafe
             $message = "Votre café est prêt";
         }
         $this->cafe--;
+        $this->hasAskedForCoffee = false;
 
         $message = $message . "<br>" . $texteRenduMonnaie;
 
@@ -98,7 +116,7 @@ class MachineACafe
     /**
      * ajoute un nombre nbSucres a la machine
      */
-    public function ajoutSucre(int $nbSucres): string
+    public function ajoutSucre(int $nbSucres = 1): string
     {
         $this->sugar += $nbSucres;
         return "Vous ajoutez $nbSucres sucres";

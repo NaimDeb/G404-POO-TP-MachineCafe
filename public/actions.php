@@ -51,15 +51,46 @@ switch ($_POST["action"]) {
             ]);
             break;
     
-        case 'sugar':
-            
+        case 'addsugar':
+            $message = $machine->ajoutSucre();
+            echo json_encode([
+                "status" => "Success",
+                "message" => $message,
+                "sugar" => $machine->getSugar(),
+
+            ]);
+            break;
+        case 'addcoffee':
+            $message = $machine->mettreUneDosette();
+            echo json_encode([
+                "status" => "Success",
+                "message" => $message,
+                "coffee" => $machine->getCoffee(),
+            ]);
             break;
     
         case 'ask':
 
+            $message = $machine->demanderCafe($_POST["avecSucre"]);
+            echo json_encode([
+                "status" => "Success",
+                "message" => $message,
+            ]);
+
             break;
     
         case 'pay':
+
+            $message = $machine->payerCafe($_POST["amountgiven"]);
+
+            echo json_encode([
+                "status" => "Success",
+                "message" => $message,
+                "sugar" => $machine->getSugar(),
+                "coffee" => $machine->getCoffee(),
+            ]);
+
+
 
             break;
     
